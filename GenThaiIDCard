@@ -1,0 +1,73 @@
+Sub GenThaiIDCard()
+    On Error GoTo ErrLne
+    oldname = ActiveSheet.Name
+    Columns("A:A").NumberFormat = "@"
+    i1 = 0
+    Do
+        i1 = i1 + 1
+        t1 = Trim(ActiveSheet.Cells(i1, 1))
+        If t1 = "" Then Exit Do
+    Loop
+    If i1 = 1 Then
+        j1 = 1: j2 = 10: j3 = 1: j4 = 1: j5 = 1
+        row1 = 0
+    Else
+        t1 = Trim(ActiveSheet.Cells(i1 - 1, 1))
+        j1 = Mid(t1, 1, 1)
+        j2 = Mid(t1, 2, 2)
+        j3 = Mid(t1, 4, 2)
+        j4 = Mid(t1, 6, 5)
+        j5 = Mid(t1, 11, 2)
+        If j5 = 99 Then j5 = 1: j4 = j4 + 1
+        If j4 = 99999 Then j4 = 1: j3 = j3 + 1
+        If j3 = 99 Then j3 = 1: j2 = j2 + 1
+        If j2 = 99 Then j2 = 1: j1 = j1 + 1
+        row1 = i1 - 2
+    End If
+        
+    fext = "N": r1 = 0
+    For i1 = j1 To 8
+        For i2 = j2 To 99
+            For i3 = j3 To 99
+                For i4 = j4 To 99999
+                    For i5 = j5 To 99
+                        t1 = i1 & Format(i2, "00") & Format(i3, "00") & Format(i4, "00000") & Format(i5, "00")
+                        j = 14: k = 0
+                        For i = 1 To 12
+                            j = j - 1
+                            k = k + Mid(t1, i, 1) * j
+                        Next i
+                        k = k Mod 11
+                        k = 11 - k
+                        t1 = t1 & Mid(Format(k, "00"), 2, 1)
+                        row1 = row1 + 1
+                        ActiveSheet.Cells(row1, 1) = t1
+                        r1 = r1 + 1
+                        ActiveSheet.Name = r1: DoEvents
+                        If r1 Mod 10000 = 0 Then fext = "Y"
+                        If fext = "Y" Then Exit For
+                    Next i5
+                    j5 = 1
+                    If fext = "Y" Then Exit For
+                Next i4
+                j4 = 1
+                If fext = "Y" Then Exit For
+            Next i3
+            j3 = 1
+            If fext = "Y" Then Exit For
+        Next i2
+        j2 = 10
+        If fext = "Y" Then Exit For
+    Next i1
+    ActiveSheet.Name = oldname
+    MsgBox "Row " & row1 & "=" & t1 & vbCrLf & "OK", vbInformation
+    
+    Exit Sub
+    
+ErrLne:
+    ChkErr = Err.Number
+    MsgBox "Error " & Err.Number & " : " & Err.Description, vbInformation
+    Resume Next
+
+End Sub
+
